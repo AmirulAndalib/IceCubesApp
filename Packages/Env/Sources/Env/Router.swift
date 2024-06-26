@@ -81,7 +81,7 @@ public enum SheetDestination: Identifiable, Hashable {
   public var id: String {
     switch self {
     case .editStatusEditor, .newStatusEditor, .replyToStatusEditor, .quoteStatusEditor,
-        .mentionStatusEditor, .quoteLinkStatusEditor, .prefilledStatusEditor, .imageURL:
+         .mentionStatusEditor, .quoteLinkStatusEditor, .prefilledStatusEditor, .imageURL:
       "statusEditor"
     case .listCreate:
       "listCreate"
@@ -115,6 +115,18 @@ public enum SheetDestination: Identifiable, Hashable {
   }
 }
 
+public enum SettingsStartingPoint {
+  case display
+  case haptic
+  case remoteTimelines
+  case tagGroups
+  case recentTags
+  case content
+  case swipeActions
+  case tabAndSidebarEntries
+  case translation
+}
+
 @MainActor
 @Observable public class RouterPath {
   public var client: Client?
@@ -122,6 +134,8 @@ public enum SheetDestination: Identifiable, Hashable {
 
   public var path: [RouterDestination] = []
   public var presentedSheet: SheetDestination?
+
+  public static var settingsStartingPoint: SettingsStartingPoint? = nil
 
   public init() {}
 
@@ -177,9 +191,10 @@ public enum SheetDestination: Identifiable, Hashable {
       }
       return .handled
     } else if let client,
-             client.isAuth,
-             client.hasConnection(with: url),
-              let id = Int(url.lastPathComponent) {
+              client.isAuth,
+              client.hasConnection(with: url),
+              let id = Int(url.lastPathComponent)
+    {
       if url.absoluteString.contains(client.server) {
         navigate(to: .statusDetail(id: String(id)))
       } else {
@@ -189,11 +204,12 @@ public enum SheetDestination: Identifiable, Hashable {
     }
     return urlHandler?(url) ?? .systemAction
   }
-  
+
   public func handleDeepLink(url: URL) -> OpenURLAction.Result {
     guard let client,
           client.isAuth,
-          let id = Int(url.lastPathComponent) else {
+          let id = Int(url.lastPathComponent)
+    else {
       return urlHandler?(url) ?? .systemAction
     }
     // First check whether we already know that the client's server federates with the server this post is on
@@ -211,18 +227,18 @@ public enum SheetDestination: Identifiable, Hashable {
         handlerOrDefault(url: url)
         return
       }
-      
+
       guard client.hasConnection(with: url) else {
         handlerOrDefault(url: url)
         return
       }
-      
+
       navigateToStatus(url: url, id: id)
     }
-    
+
     return .handled
   }
-  
+
   private func navigateToStatus(url: URL, id: Int) {
     guard let client else { return }
     if url.absoluteString.contains(client.server) {
@@ -231,7 +247,7 @@ public enum SheetDestination: Identifiable, Hashable {
       navigate(to: .remoteStatusDetail(url: url))
     }
   }
-  
+
   private func handlerOrDefault(url: URL) {
     if let urlHandler {
       _ = urlHandler(url)

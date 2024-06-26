@@ -24,6 +24,7 @@ public struct AccountDetailView: View {
   @State private var isCurrentUser: Bool = false
   @State private var showBlockConfirmation: Bool = false
   @State private var isEditingRelationshipNote: Bool = false
+  @State private var showTranslateView: Bool = false
 
   @State private var displayTitle: Bool = false
 
@@ -82,7 +83,7 @@ public struct AccountDetailView: View {
                          client: client,
                          routerPath: routerPath)
       }
-      .environment(\.defaultMinListRowHeight, 1)
+      .environment(\.defaultMinListRowHeight, 0)
       .listStyle(.plain)
       #if !os(visionOS)
         .scrollContentBackground(.hidden)
@@ -285,7 +286,9 @@ public struct AccountDetailView: View {
       }
 
       Menu {
-        AccountDetailContextMenu(showBlockConfirmation: $showBlockConfirmation, viewModel: viewModel)
+        AccountDetailContextMenu(showBlockConfirmation: $showBlockConfirmation, 
+                                 showTranslateView: $showTranslateView,
+                                 viewModel: viewModel)
 
         if !viewModel.isCurrentUser {
           Button {
@@ -326,20 +329,19 @@ public struct AccountDetailView: View {
 
           if let account = viewModel.account {
             Divider()
-            
+
             Button {
               routerPath.navigate(to: .blockedAccounts)
             } label: {
               Label("account.blocked", systemImage: "person.crop.circle.badge.xmark")
             }
 
-            
             Button {
               routerPath.navigate(to: .mutedAccounts)
             } label: {
               Label("account.muted", systemImage: "person.crop.circle.badge.moon")
             }
-            
+
             Divider()
 
             Button {
@@ -381,6 +383,9 @@ public struct AccountDetailView: View {
       } message: {
         Text("account.action.block-user-confirmation")
       }
+      #if canImport(_Translation_SwiftUI)
+      .addTranslateView(isPresented: $showTranslateView, text: viewModel.account?.note.asRawText ?? "")
+      #endif
     }
   }
 }

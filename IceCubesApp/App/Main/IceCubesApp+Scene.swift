@@ -1,8 +1,8 @@
+import AppIntents
 import Env
 import MediaUI
 import StatusKit
 import SwiftUI
-import AppIntents
 
 extension IceCubesApp {
   var appScene: some Scene {
@@ -100,6 +100,7 @@ extension IceCubesApp {
         }
       }
       .withEnvironments()
+      .environment(RouterPath())
       .withModelContainer()
       .applyTheme(theme)
       .frame(minWidth: 300, minHeight: 400)
@@ -125,20 +126,21 @@ extension IceCubesApp {
     .defaultSize(width: 1200, height: 1000)
     .windowResizability(.contentMinSize)
   }
-  
-  private func handleIntent(_ intent: any AppIntent) {
+
+  private func handleIntent(_: any AppIntent) {
     if let postIntent = appIntentService.handledIntent?.intent as? PostIntent {
       #if os(visionOS) || os(macOS)
-      openWindow(value: WindowDestinationEditor.prefilledStatusEditor(text: postIntent.content ?? "",
-                                                                      visibility: userPreferences.postVisibility))
+        openWindow(value: WindowDestinationEditor.prefilledStatusEditor(text: postIntent.content ?? "",
+                                                                        visibility: userPreferences.postVisibility))
       #else
-      appRouterPath.presentedSheet = .prefilledStatusEditor(text: postIntent.content ?? "",
-                                                            visibility: userPreferences.postVisibility)
+        appRouterPath.presentedSheet = .prefilledStatusEditor(text: postIntent.content ?? "",
+                                                              visibility: userPreferences.postVisibility)
       #endif
     } else if let tabIntent = appIntentService.handledIntent?.intent as? TabIntent {
       selectedTab = tabIntent.tab.toAppTab
-    } else if let imageIntent = appIntentService.handledIntent?.intent as? PostPhotoIntent,
-              let urls = imageIntent.images?.compactMap({ $0.fileURL }) {
+    } else if let imageIntent = appIntentService.handledIntent?.intent as? PostImageIntent,
+              let urls = imageIntent.images?.compactMap({ $0.fileURL })
+    {
       appRouterPath.presentedSheet = .imageURL(urls: urls,
                                                visibility: userPreferences.postVisibility)
     }

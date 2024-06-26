@@ -31,7 +31,9 @@ struct SettingsTabs: View {
   @Binding var popToRootTab: Tab
 
   let isModal: Bool
-
+  
+  @State private var startingPoint: SettingsStartingPoint? = nil
+  
   var body: some View {
     NavigationStack(path: $routerPath.path) {
       Form {
@@ -64,6 +66,32 @@ struct SettingsTabs: View {
         }
         .withAppRouter()
         .withSheetDestinations(sheetDestinations: $routerPath.presentedSheet)
+        .onAppear {
+          startingPoint = RouterPath.settingsStartingPoint
+          RouterPath.settingsStartingPoint = nil
+        }
+        .navigationDestination(item: $startingPoint) { targetView in
+          switch targetView {
+            case .display:
+              DisplaySettingsView()
+            case .haptic:
+              HapticSettingsView()
+            case .remoteTimelines:
+              RemoteTimelinesSettingView()
+            case .tagGroups:
+              TagsGroupSettingView()
+            case .recentTags:
+              RecenTagsSettingView()
+            case .content:
+              ContentSettingsView()
+            case .swipeActions:
+              SwipeActionsSettingsView()
+            case .tabAndSidebarEntries:
+              EmptyView()
+            case .translation:
+              TranslationSettingsView()
+          }
+        }
     }
     .onAppear {
       routerPath.client = client
@@ -236,10 +264,14 @@ struct SettingsTabs: View {
             Text("settings.app.icon")
           } icon: {
             let icon = IconSelectorView.Icon(string: UIApplication.shared.alternateIconName ?? "AppIcon")
-            Image(uiImage: .init(named: icon.appIconName)!)
-              .resizable()
-              .frame(width: 25, height: 25)
-              .cornerRadius(4)
+            if let image: UIImage = .init(named: icon.appIconName) {
+              Image(uiImage: image)
+                .resizable()
+                .frame(width: 25, height: 25)
+                .cornerRadius(4)
+            } else {
+              EmptyView()
+            }
           }
         }
       #endif

@@ -6,9 +6,9 @@ public struct NotificationsPolicy: Codable, Sendable {
   public var filterNewAccounts: Bool
   public var filterPrivateMentions: Bool
   public let summary: Summary
-  
+
   public struct Summary: Codable, Sendable {
-    public let pendingRequestsCount: String
-    public let pendingNotificationsCount: String
+    public let pendingRequestsCount: Int
+    public let pendingNotificationsCount: Int
   }
 }
