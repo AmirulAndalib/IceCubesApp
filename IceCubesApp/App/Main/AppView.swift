@@ -38,8 +38,15 @@ struct AppView: View {
 
   var body: some View {
     HStack(spacing: 0) {
-      tabBarView
-        .tabViewStyle(.sidebarAdaptable)
+      Group {
+        if #available(iOS 27.0, visionOS 27.0, *) {
+          tabBarView
+            .defaultTabBarPlacement(horizontalSizeClass == .regular ? .sidebar : .automatic)
+        } else {
+          tabBarView
+        }
+      }
+      .tabViewStyle(.sidebarAdaptable)
       if horizontalSizeClass == .regular
         && (UIDevice.current.userInterfaceIdiom == .pad
           || UIDevice.current.userInterfaceIdiom == .mac),
@@ -56,7 +63,7 @@ struct AppView: View {
     guard appAccountsManager.currentClient.isAuth else {
       return [SidebarSections.loggedOutTabs]
     }
-    if UIDevice.current.userInterfaceIdiom == .phone || horizontalSizeClass == .compact {
+    if horizontalSizeClass == .compact {
       return [SidebarSections.iosTabs]
     } else if UIDevice.current.userInterfaceIdiom == .vision {
       return [SidebarSections.visionOSTabs]
